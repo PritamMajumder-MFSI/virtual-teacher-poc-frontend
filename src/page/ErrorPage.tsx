@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import { errorImage } from "../assets";
 
 const ErrorPage = () => {
   const navigate = useNavigate();
@@ -11,8 +12,8 @@ const ErrorPage = () => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 text-gray-800">
       <div className="max-w-md text-center">
         <img
-          src="/error-illustration.jpg"
-          alt="Error Illustration"
+          src={errorImage}
+          alt="Error"
           className="w-full h-auto mb-8"
         />
         <h1 className="text-4xl font-bold mb-4">Oops! Something went wrong.</h1>
