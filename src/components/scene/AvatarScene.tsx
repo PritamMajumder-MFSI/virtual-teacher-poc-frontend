@@ -2,8 +2,9 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense } from "react";
 import { AvatarModel } from "../models/AvatarModel";
 import { OrbitControls, Sky } from "@react-three/drei";
+import { TMouthShape } from "../../types/type";
 
-const AvatarScene = () => {
+const AvatarScene = ({ mouthShape }: { mouthShape: TMouthShape }) => {
   return (
     <>
       <Canvas
@@ -18,7 +19,12 @@ const AvatarScene = () => {
         <directionalLight intensity={0.4} />
         <Suspense fallback={null}>
           <Sky />
-          <AvatarModel position={[0, -1.25, 0]} scale={1} receiveShadow />
+          <AvatarModel
+            mouthShape={mouthShape}
+            position={[0, -1.25, 0]}
+            scale={1}
+            receiveShadow
+          />
         </Suspense>
         <OrbitControls />
       </Canvas>

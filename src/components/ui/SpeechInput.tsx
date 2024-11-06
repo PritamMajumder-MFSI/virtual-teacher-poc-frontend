@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
+import { TMouthShape } from "../../types/type";
 
-const SpeechInput = () => {
+const SpeechInput = ({
+  updateMouthShape,
+}: {
+  updateMouthShape: (shape: TMouthShape) => void;
+}) => {
   const [text, setText] = useState<string>("");
   const [femaleVoice, setFemaleVoice] = useState<SpeechSynthesisVoice | null>(
     null
@@ -21,12 +26,13 @@ const SpeechInput = () => {
     window.speechSynthesis.onvoiceschanged = loadVoices;
   }, []);
 
-  const mouthShapes = ["closed", "open", "round", "wide"];
+  const mouthShapes: TMouthShape[] = ["closed", "open", "round", "wide"];
 
   const animateMouth = (boundary: SpeechSynthesisEvent) => {
+    console.log(boundary.name);
     const word = boundary.charIndex;
     const mouthShape = mouthShapes[word % mouthShapes.length];
-    console.log("Mouth shape: ", mouthShape);
+    updateMouthShape(mouthShape);
   };
 
   const speakText = (inputText: string) => {
