@@ -2,19 +2,21 @@ import { useAnimations, useGLTF } from "@react-three/drei";
 import { avatarAnimationsGlb, avatarGlb } from "../../assets";
 import { Group, MeshStandardMaterial, SkinnedMesh } from "three";
 import { useEffect, useRef, useState } from "react";
-import { GroupProps } from "@react-three/fiber";
-import { TMouthShape } from "../../types/type";
+import { GroupProps, useFrame } from "@react-three/fiber";
+import correspondings from "../../utils/correspondings";
+import * as THREE from "three";
 
 export const AvatarModel = ({
   mouthShape,
   ...props
 }: {
-  mouthShape: TMouthShape;
+  mouthShape: string;
 } & GroupProps) => {
+  const morphTargetSmoothing = 0.75;
   const group = useRef(null);
   const { animations } = useGLTF(avatarAnimationsGlb);
   const { actions } = useAnimations(animations, group);
-  const [animation] = useState(
+  const [animation, setAnimation] = useState(
     animations.find((a) => a.name === "idle") ? "idle" : animations[0].name
   );
   const { nodes, materials } = useGLTF(avatarGlb) as unknown as {
@@ -43,41 +45,95 @@ export const AvatarModel = ({
       Wolf3D_Outfit_Top: MeshStandardMaterial;
     };
   };
-  const [isPlaying, setIsPlaying] = useState(false);
+
+  const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   useEffect(() => {
     const action = actions?.[animation];
     if (action) {
-      if (!isPlaying) {
-        action.reset().fadeIn(0).play();
-        setIsPlaying(true);
-      } else {
-        action.reset().fadeIn(0.5).play();
-      }
+      action.reset().fadeIn(0.5).play();
 
       return () => {
         action.fadeOut(0.5);
-        setIsPlaying(false);
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animation]);
+  useEffect(() => {
+    const actionNames = ["talk_1", "talk_2", "talk_3"];
+    const randomIndex = Math.floor(Math.random() * actionNames.length);
+    const name = actionNames[randomIndex];
+    if (isSpeaking) {
+      setAnimation(name);
+    } else {
+      setAnimation("idle");
+    }
+  }, [isSpeaking]);
+  const changeMouthShape = (mouthShape: string) => {
+    Object.values(correspondings).forEach((value) => {
+      if (
+        nodes.Wolf3D_Head.morphTargetInfluences &&
+        nodes.Wolf3D_Head.morphTargetDictionary &&
+        nodes.Wolf3D_Teeth.morphTargetInfluences &&
+        nodes.Wolf3D_Teeth.morphTargetDictionary
+      ) {
+        nodes.Wolf3D_Head.morphTargetInfluences[
+          nodes.Wolf3D_Head.morphTargetDictionary[value]
+        ] = THREE.MathUtils.lerp(
+          nodes.Wolf3D_Head.morphTargetInfluences[
+            nodes.Wolf3D_Head.morphTargetDictionary[value]
+          ],
+          0,
+          morphTargetSmoothing
+        );
+        nodes.Wolf3D_Teeth.morphTargetInfluences[
+          nodes.Wolf3D_Teeth.morphTargetDictionary[value]
+        ] = THREE.MathUtils.lerp(
+          nodes.Wolf3D_Teeth.morphTargetInfluences[
+            nodes.Wolf3D_Teeth.morphTargetDictionary[value]
+          ],
+          0,
+          morphTargetSmoothing
+        );
+      }
+    });
+    if (
+      nodes.Wolf3D_Head.morphTargetDictionary &&
+      nodes.Wolf3D_Head.morphTargetInfluences &&
+      nodes.Wolf3D_Teeth.morphTargetInfluences &&
+      nodes.Wolf3D_Teeth.morphTargetDictionary &&
+      mouthShape != "END"
+    ) {
+      nodes.Wolf3D_Head.morphTargetInfluences[
+        nodes.Wolf3D_Head.morphTargetDictionary[mouthShape]
+      ] = THREE.MathUtils.lerp(
+        nodes.Wolf3D_Head.morphTargetInfluences[
+          nodes.Wolf3D_Head.morphTargetDictionary[mouthShape]
+        ],
+        1,
+        morphTargetSmoothing
+      );
 
-  const changeMouthShape = (mouthShape: TMouthShape) => {
-    switch (mouthShape) {
-      case "closed":
-        break;
-      case "open":
-        break;
-      case "round":
-        break;
-      case "wide":
-        break;
-      default:
+      nodes.Wolf3D_Teeth.morphTargetInfluences[
+        nodes.Wolf3D_Teeth.morphTargetDictionary[mouthShape]
+      ] = THREE.MathUtils.lerp(
+        nodes.Wolf3D_Teeth.morphTargetInfluences[
+          nodes.Wolf3D_Teeth.morphTargetDictionary[mouthShape]
+        ],
+        1,
+        morphTargetSmoothing
+      );
     }
   };
 
-  useEffect(() => {
+  useFrame(() => {
     changeMouthShape(mouthShape);
+  });
+  useEffect(() => {
+    if (mouthShape && mouthShape != "END") {
+      setIsSpeaking(true);
+    } else {
+      setIsSpeaking(false);
+    }
   }, [mouthShape]);
   return (
     <group ref={group as React.RefObject<Group>} {...props} dispose={null}>

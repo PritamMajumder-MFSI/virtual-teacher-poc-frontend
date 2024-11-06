@@ -1,1 +1,1 @@
-export type TMouthShape = "closed" | "open" | "round" | "wide";
+// export type string = "closed" | "open" | "round" | "wide";

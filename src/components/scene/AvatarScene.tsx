@@ -2,9 +2,8 @@ import { Canvas } from "@react-three/fiber";
 import { Suspense } from "react";
 import { AvatarModel } from "../models/AvatarModel";
 import { OrbitControls, Sky } from "@react-three/drei";
-import { TMouthShape } from "../../types/type";
 
-const AvatarScene = ({ mouthShape }: { mouthShape: TMouthShape }) => {
+const AvatarScene = ({ mouthShape }: { mouthShape: string }) => {
   return (
     <>
       <Canvas
