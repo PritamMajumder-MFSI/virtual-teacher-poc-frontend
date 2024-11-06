@@ -1,10 +1,17 @@
 
-import { useGLTF } from '@react-three/drei'
-import { avatarGlb } from '../../assets'
-import { Group,  MeshStandardMaterial, Object3DEventMap, SkinnedMesh } from 'three'
-import { useRef } from 'react'
+import { useAnimations, useGLTF } from '@react-three/drei'
+import { avatarAnimationsGlb, avatarGlb } from '../../assets'
+import { Group,  MeshStandardMaterial, SkinnedMesh } from 'three'
+import { useEffect, useRef, useState,  } from 'react'
+
 
 export const AvatarModel = ({ ...props }) =>  {
+  const group = useRef(null)
+  const { animations } = useGLTF(avatarAnimationsGlb);
+  const {  actions } = useAnimations(animations,group );
+  const [animation] = useState(
+    animations.find((a) => a.name === "idle") ? "idle" : animations[0].name 
+  );
   const { nodes, materials } = useGLTF(avatarGlb) as unknown as {
     nodes: {
       Hips: Group
@@ -31,11 +38,27 @@ export const AvatarModel = ({ ...props }) =>  {
       Wolf3D_Outfit_Top: MeshStandardMaterial
     }
   }
-  const group = useRef<Group<Object3DEventMap>>(null);
-
+  const [isPlaying, setIsPlaying] = useState(false)
+  useEffect(() => {
+    const action = actions?.[animation]
+    if (action) {
+      if (!isPlaying) {
+        action.reset().fadeIn(0).play()
+        setIsPlaying(true)
+      } else {
+        action.reset().fadeIn(0.5).play()
+      }
+      
+      return () => {
+        action.fadeOut(0.5)
+        setIsPlaying(false) 
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [animation])
   return (
-    <group ref={group} {...props} dispose={null}>
-      <primitive object={nodes.Hips} />
+    <group ref={group as React.RefObject<Group>} {...props} dispose={null}>
+     <primitive object={nodes.Hips} />
       <skinnedMesh
         name="EyeLeft"
         geometry={nodes.EyeLeft.geometry}
@@ -102,5 +125,5 @@ export const AvatarModel = ({ ...props }) =>  {
   )
 }
 
-useGLTF.preload(avatarGlb)
+ useGLTF.preload(avatarGlb)
 
