@@ -1,4 +1,5 @@
-import { AvatarScene } from "../../components/scene"
+import { AvatarScene } from "../components/scene"
+
 
 
 const Home = () => {
