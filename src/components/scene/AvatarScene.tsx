@@ -1,29 +1,29 @@
-import { Canvas } from "@react-three/fiber"
-import { Suspense } from "react"
-import { AvatarModel } from "../models/AvatarModel"
-import { OrbitControls, Sky } from "@react-three/drei"
-
+import { Canvas } from "@react-three/fiber";
+import { Suspense } from "react";
+import { AvatarModel } from "../models/AvatarModel";
+import { OrbitControls, Sky } from "@react-three/drei";
 
 const AvatarScene = () => {
   return (
     <>
-    <Canvas
-       camera={{ position: [2, 0, 12.25], fov: 15 }}
-    >
-       <ambientLight intensity={1.25} />
-       <ambientLight intensity={0.1} />
-       <directionalLight intensity={0.4} />
-       <Suspense fallback={null}>
-       <Sky/>
-       <AvatarModel 
-        position={[0,-0.5,0]}
-          receiveShadow
-        />
-       </Suspense>
-       <OrbitControls />
-    </Canvas>
-  </>
-  )
-}
+      <Canvas
+        camera={{ position: [0, 0.5, 1.5], fov: 42 }}
+        style={{
+          width: "100vw",
+          height: "100vh",
+        }}
+      >
+        <ambientLight intensity={1.25} />
+        <ambientLight intensity={0.1} />
+        <directionalLight intensity={0.4} />
+        <Suspense fallback={null}>
+          <Sky />
+          <AvatarModel position={[0, -1.25, 0]} scale={1} receiveShadow />
+        </Suspense>
+        <OrbitControls />
+      </Canvas>
+    </>
+  );
+};
 
-export default AvatarScene
+export default AvatarScene;

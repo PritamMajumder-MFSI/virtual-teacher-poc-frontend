@@ -1,11 +1,13 @@
-import { AvatarScene } from "../components/scene"
-
-
+import { AvatarScene } from "../components/scene";
+import { SpeechInput } from "../components/ui";
 
 const Home = () => {
   return (
-    <AvatarScene />
-  )
-}
+    <>
+      <AvatarScene />
+      <SpeechInput />
+    </>
+  );
+};
 
-export default Home
+export default Home;

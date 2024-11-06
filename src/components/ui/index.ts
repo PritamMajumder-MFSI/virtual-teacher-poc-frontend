@@ -1,4 +1,4 @@
-import BottomInput from "./BottomInput";
+import SpeechInput from "./SpeechInput";
 import Spinner from "./Spinner";
 
-export { Spinner, BottomInput };
+export { Spinner, SpeechInput };
