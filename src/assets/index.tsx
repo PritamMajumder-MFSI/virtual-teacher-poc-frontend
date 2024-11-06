@@ -1,0 +1,1 @@
+export const avatarGlb = "/3dModels/avatar.glb"
