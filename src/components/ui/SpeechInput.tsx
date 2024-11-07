@@ -60,7 +60,13 @@ const SpeechInput = ({
         <input
           type="text"
           value={text}
-          onChange={(e) => setText(e.target.value)}
+          onChange={(e) => {
+            e.stopPropagation();
+            setText(e.target.value);
+          }}
+          onKeyUp={(e) => {
+            e.stopPropagation();
+          }}
           placeholder="Enter text to speak"
           className="flex-1 px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         />

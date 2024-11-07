@@ -14,6 +14,7 @@ export const AvatarModel = ({
   setIsJumping,
   orbitControlsRef,
   isJumping,
+  sceneRef,
   ...props
 }: {
   mouthShape: string;
@@ -21,6 +22,8 @@ export const AvatarModel = ({
   isMoving: boolean;
   isJumping: boolean;
   setIsMoving: React.Dispatch<React.SetStateAction<boolean>>;
+  sceneRef: React.RefObject<HTMLDivElement>;
+
   setIsJumping: React.Dispatch<React.SetStateAction<boolean>>;
 } & GroupProps) => {
   const morphTargetSmoothing = 0.75;
@@ -170,13 +173,6 @@ export const AvatarModel = ({
       );
     }
   };
-  useEffect(() => {
-    if (mouthShape && mouthShape != "END") {
-      setIsSpeaking(true);
-    } else {
-      setIsSpeaking(false);
-    }
-  }, [mouthShape]);
   const handleAnimation = () => {
     if (isSpeaking) {
       const actionNames = ["talk_1", "talk_2", "talk_3"];
@@ -242,6 +238,14 @@ export const AvatarModel = ({
       setAnimation("idle");
     }
   };
+  useEffect(() => {
+    if (mouthShape && mouthShape != "END") {
+      setIsSpeaking(true);
+    } else {
+      setIsSpeaking(false);
+    }
+  }, [mouthShape]);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "x") {
@@ -323,13 +327,17 @@ export const AvatarModel = ({
         setIsRunning(false);
       }
     };
-
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
+    const canvasContainer = sceneRef.current;
+    if (canvasContainer) {
+      canvasContainer.addEventListener("keydown", handleKeyDown);
+      canvasContainer.addEventListener("keyup", handleKeyUp);
+    }
 
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
+      if (canvasContainer) {
+        canvasContainer.removeEventListener("keydown", handleKeyDown);
+        canvasContainer.removeEventListener("keyup", handleKeyUp);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
