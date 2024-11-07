@@ -1,10 +1,13 @@
 import { Canvas } from "@react-three/fiber";
-import { Suspense, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { Environment, OrbitControls, Sky } from "@react-three/drei";
 import { AbandonedBrickRoomModel, AvatarModel } from "../models";
+import { OrbitControls as ThreeOrbitControls } from "three-stdlib";
 
 const AvatarScene = ({ mouthShape }: { mouthShape: string }) => {
-  const [, setOrbitalControlEnabled] = useState(true);
+  const [isMoving, setIsMoving] = useState(false);
+  const [isJumping, setIsJumping] = useState(false);
+  const orbitControlsRef = useRef<ThreeOrbitControls>(null);
 
   return (
     <Canvas
@@ -32,7 +35,11 @@ const AvatarScene = ({ mouthShape }: { mouthShape: string }) => {
           receiveShadow
         />
         <AvatarModel
-          setOrbitalControlEnabled={setOrbitalControlEnabled}
+          orbitControlsRef={orbitControlsRef}
+          isMoving={isMoving}
+          isJumping={isJumping}
+          setIsMoving={setIsMoving}
+          setIsJumping={setIsJumping}
           mouthShape={mouthShape}
           position={[0, -1.25, 0]}
           scale={1}
@@ -41,12 +48,15 @@ const AvatarScene = ({ mouthShape }: { mouthShape: string }) => {
         />
       </Suspense>
       <OrbitControls
+        ref={orbitControlsRef}
         enableZoom={false}
         enableRotate={true}
         enablePan={false}
-        enabled={false}
-        enableDamping
-        dampingFactor={0.25}
+        enabled={true}
+        maxDistance={2}
+        minDistance={2}
+        maxPolarAngle={Math.PI / 2}
+        minPolarAngle={0}
       />
       <perspectiveCamera position={[0, 2, -5]} />
     </Canvas>

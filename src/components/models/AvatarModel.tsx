@@ -6,18 +6,22 @@ import { GroupProps, useFrame } from "@react-three/fiber";
 import correspondings from "../../utils/correspondings";
 import * as THREE from "three";
 import { TAvatarModel } from "../../types/gltfTypes";
-// const forwardCameraOffset = new THREE.Vector3(0, 1.5, -2);
-// const backwardCameraOffset = new THREE.Vector3(0, 1.5, 2);
-// const leftCameraOffset = new THREE.Vector3(0, 1.5, -2);
-// const rightCameraOffset = new THREE.Vector3(0, 1.5, -2);
+import { OrbitControls as ThreeOrbitControls } from "three-stdlib";
 
 export const AvatarModel = ({
   mouthShape,
-  setOrbitalControlEnabled,
+  setIsMoving,
+  setIsJumping,
+  orbitControlsRef,
+  isJumping,
   ...props
 }: {
   mouthShape: string;
-  setOrbitalControlEnabled: React.Dispatch<React.SetStateAction<boolean>>;
+  orbitControlsRef: React.RefObject<ThreeOrbitControls>;
+  isMoving: boolean;
+  isJumping: boolean;
+  setIsMoving: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsJumping: React.Dispatch<React.SetStateAction<boolean>>;
 } & GroupProps) => {
   const morphTargetSmoothing = 0.75;
   const group = useRef<Group<THREE.Object3DEventMap>>(null);
@@ -35,7 +39,6 @@ export const AvatarModel = ({
   const [moveLeft, setMoveLeft] = useState(false);
   const [moveRight, setMoveRight] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
-  const [isJumping, setIsJumping] = useState(false);
   const [isDancing, setIsDancing] = useState(false);
   const [yVelocity, setYVelocity] = useState(0);
 
@@ -115,6 +118,7 @@ export const AvatarModel = ({
           handleAnimation();
         }
       }
+      setIsMoving(isMoving);
       if (isMoving) adjustCamera(camera);
     }
   };
@@ -133,9 +137,8 @@ export const AvatarModel = ({
       avatarPosition.y + 1.5,
       avatarPosition.z - 2
     );
+    orbitControlsRef.current?.target.lerp(targetPosition, 0.1);
     camera.position.lerp(targetPosition, 0.1);
-
-    setOrbitalControlEnabled(false);
   };
   const changeMouthShape = (mouthShape: string) => {
     Object.values(correspondings).forEach((value) => {
