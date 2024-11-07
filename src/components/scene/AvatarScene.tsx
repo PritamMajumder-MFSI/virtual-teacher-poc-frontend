@@ -54,8 +54,8 @@ const AvatarScene = ({ mouthShape }: { mouthShape: string }) => {
         enableRotate={true}
         enablePan={false}
         enabled={true}
-        maxDistance={2}
-        minDistance={2}
+        maxDistance={3}
+        minDistance={3}
         maxPolarAngle={Math.PI / 2}
         minPolarAngle={0}
       />

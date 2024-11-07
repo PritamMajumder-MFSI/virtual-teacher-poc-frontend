@@ -186,26 +186,65 @@ export const AvatarModel = ({
   const handleAnimation = () => {
     if (isSpeaking) {
       const actionNames = ["talk_1", "talk_2", "talk_3"];
+      if (actionNames.includes(animation)) {
+        return;
+      }
       const randomIndex = Math.floor(Math.random() * actionNames.length);
       const name = actionNames[randomIndex];
       if (isSpeaking) {
         setAnimation(name);
       }
     } else if (moveForward) {
+      if (
+        (isRunning && animation == "run") ||
+        (!isRunning && animation == "walk")
+      ) {
+        return;
+      }
       setAnimation(isRunning ? "run" : "walk");
     } else if (moveBackward) {
+      if (
+        (isRunning && animation == "run_back") ||
+        (!isRunning && animation == "walk_back")
+      ) {
+        return;
+      }
       setAnimation(isRunning ? "run_back" : "walk_back");
     } else if (moveLeft) {
+      if (
+        (isRunning && animation == "left_strafe") ||
+        (!isRunning && animation == "left_strafe_walk")
+      ) {
+        return;
+      }
       setAnimation(isRunning ? "left_strafe" : "left_strafe_walk");
     } else if (moveRight) {
+      if (
+        (isRunning && animation == "right_strafe") ||
+        (!isRunning && animation == "right_strafe_walk")
+      ) {
+        return;
+      }
       setAnimation(isRunning ? "right_strafe" : "right_strafe_walk");
     } else if (isJumping) {
+      if (animation == "jump") {
+        return;
+      }
       setAnimation("jump");
     } else if (isCrouching) {
+      if (animation == "crouch") {
+        return;
+      }
       setAnimation("crouch");
     } else if (isDancing) {
+      if (animation == "dance") {
+        return;
+      }
       setAnimation("dance");
     } else {
+      if (animation == "idle") {
+        return;
+      }
       setAnimation("idle");
     }
   };
