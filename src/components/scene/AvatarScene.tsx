@@ -3,6 +3,7 @@ import { Suspense, useRef, useState } from "react";
 import { Environment, OrbitControls, Sky } from "@react-three/drei";
 import { AbandonedBrickRoomModel, AvatarModel } from "../models";
 import { OrbitControls as ThreeOrbitControls } from "three-stdlib";
+import { LoaderScene } from "./LoaderScene";
 
 const AvatarScene = ({ mouthShape }: { mouthShape: string }) => {
   const [isMoving, setIsMoving] = useState(false);
@@ -27,7 +28,7 @@ const AvatarScene = ({ mouthShape }: { mouthShape: string }) => {
         castShadow
       />{" "}
       <Environment preset="sunset" />
-      <Suspense fallback={null}>
+      <Suspense fallback={<LoaderScene />}>
         <Sky sunPosition={[1, 0.5, 12]} />
         <AbandonedBrickRoomModel
           position={[0, -1.25, 0]}
