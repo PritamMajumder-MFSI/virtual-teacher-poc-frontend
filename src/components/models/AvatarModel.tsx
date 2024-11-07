@@ -57,14 +57,11 @@ export const AvatarModel = ({
 
   useFrame(({ camera }) => {
     handleAnimation();
-    handleMovement(camera);
+    handleMovement();
     changeMouthShape(mouthShape);
+    adjustCamera(camera);
   });
-  const handleMovement = (
-    camera: THREE.Camera & {
-      manual?: boolean;
-    }
-  ) => {
+  const handleMovement = () => {
     if (group.current) {
       const speed = isRunning ? 0.1 : 0.05;
       let isMoving = false;
@@ -91,15 +88,13 @@ export const AvatarModel = ({
         setYVelocity((prev) => prev - 0.01);
         if (group.current.position.y <= -1.25) {
           group.current.position.y = -1.25;
-          adjustCamera(camera);
-          console.log("called");
+
           isMoving = false;
           setIsJumping(false);
           setYVelocity(0);
         }
       }
       setIsMoving(isMoving);
-      if (isMoving) adjustCamera(camera);
     }
   };
   const adjustCamera = (
@@ -111,7 +106,6 @@ export const AvatarModel = ({
       return;
     }
     const avatarPosition = group.current.position;
-
     const targetPosition = new THREE.Vector3(
       avatarPosition.x,
       avatarPosition.y + 1.5,
