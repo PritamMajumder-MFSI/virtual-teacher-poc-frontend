@@ -54,28 +54,9 @@ export const AvatarModel = ({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [animation]);
-  useEffect(() => {
-    const actionNames = ["talk_1", "talk_2", "talk_3"];
-    const randomIndex = Math.floor(Math.random() * actionNames.length);
-    const name = actionNames[randomIndex];
-    if (isSpeaking) {
-      setAnimation(name);
-    }
-  }, [isSpeaking]);
 
   useFrame(({ camera }) => {
-    console.log(isJumping);
-    if (
-      !moveForward &&
-      !moveBackward &&
-      !moveLeft &&
-      !moveRight &&
-      !isJumping &&
-      !isCrouching &&
-      !isSpeaking
-    ) {
-      setAnimation("idle");
-    }
+    handleAnimation();
     handleMovement(camera);
     changeMouthShape(mouthShape);
   });
@@ -115,7 +96,6 @@ export const AvatarModel = ({
           isMoving = false;
           setIsJumping(false);
           setYVelocity(0);
-          handleAnimation();
         }
       }
       setIsMoving(isMoving);
@@ -204,7 +184,14 @@ export const AvatarModel = ({
     }
   }, [mouthShape]);
   const handleAnimation = () => {
-    if (moveForward) {
+    if (isSpeaking) {
+      const actionNames = ["talk_1", "talk_2", "talk_3"];
+      const randomIndex = Math.floor(Math.random() * actionNames.length);
+      const name = actionNames[randomIndex];
+      if (isSpeaking) {
+        setAnimation(name);
+      }
+    } else if (moveForward) {
       setAnimation(isRunning ? "run" : "walk");
     } else if (moveBackward) {
       setAnimation(isRunning ? "run_back" : "walk_back");
@@ -222,107 +209,106 @@ export const AvatarModel = ({
       setAnimation("idle");
     }
   };
-  useEffect(
-    () => {
-      const handleKeyDown = (event: KeyboardEvent) => {
-        if (event.key === "x") {
-          setIsDancing(true);
-          return;
-        }
-        if (isDancing) return;
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "x") {
+        setIsDancing(true);
+        return;
+      }
+      if (isDancing) return;
 
-        switch (event.key) {
-          case "w":
-          case "ArrowUp":
-            setMoveForward(true);
-            handleAnimation();
-            break;
-          case "s":
-          case "ArrowDown":
-            setMoveBackward(true);
-            handleAnimation();
-            break;
-          case "a":
-          case "ArrowLeft":
-            setMoveLeft(true);
-            handleAnimation();
-            break;
-          case "d":
-          case "ArrowRight":
-            setMoveRight(true);
-            handleAnimation();
-            break;
-          case "Shift":
+      switch (event.key) {
+        case "w":
+        case "ArrowUp":
+          setMoveForward(true);
+          break;
+        case "s":
+        case "ArrowDown":
+          setMoveBackward(true);
+          break;
+        case "a":
+        case "ArrowLeft":
+          setMoveLeft(true);
+          break;
+        case "d":
+        case "ArrowRight":
+          setMoveRight(true);
+          break;
+        case "Shift":
+          // Set isRunning only when the Shift key is pressed and movement keys are also pressed
+          if (moveForward || moveBackward || moveLeft || moveRight) {
             setIsRunning(true);
-            handleAnimation();
-            break;
-          case " ":
-            if (!isJumping) {
-              setIsJumping(true);
-              setYVelocity(0.2);
-              handleAnimation();
-            }
-            break;
-          case "Control":
-            setIsCrouching(true);
-            handleAnimation();
-            break;
-        }
-      };
+          }
+          break;
+        case " ":
+          if (!isJumping) {
+            setIsJumping(true);
+            setYVelocity(0.2);
+          }
+          break;
+        case "Control":
+          setIsCrouching(true);
+          break;
+      }
+    };
 
-      const handleKeyUp = (event: KeyboardEvent) => {
-        if (event.key === "x") {
-          setIsDancing(false);
-          return;
-        }
-        if (isDancing) return;
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (event.key === "x") {
+        setIsDancing(false);
+        return;
+      }
+      if (isDancing) return;
 
-        switch (event.key) {
-          case "w":
-          case "ArrowUp":
-            setMoveForward(false);
-            break;
-          case "s":
-          case "ArrowDown":
-            setMoveBackward(false);
-            break;
-          case "a":
-          case "ArrowLeft":
-            setMoveLeft(false);
-            break;
-          case "d":
-          case "ArrowRight":
-            setMoveRight(false);
-            break;
-          case "Shift":
-            setIsRunning(false);
-            break;
-          case "Control":
-            setIsCrouching(false);
-            break;
-        }
-      };
+      switch (event.key) {
+        case "w":
+        case "ArrowUp":
+          setMoveForward(false);
+          break;
+        case "s":
+        case "ArrowDown":
+          setMoveBackward(false);
+          break;
+        case "a":
+        case "ArrowLeft":
+          setMoveLeft(false);
+          break;
+        case "d":
+        case "ArrowRight":
+          setMoveRight(false);
+          break;
+        case "Shift":
+          // Reset isRunning when Shift key is released
+          setIsRunning(false);
+          break;
+        case "Control":
+          setIsCrouching(false);
+          break;
+      }
 
-      window.addEventListener("keydown", handleKeyDown);
-      window.addEventListener("keyup", handleKeyUp);
+      // If no movement keys are pressed, reset isRunning to false
+      if (!moveForward && !moveBackward && !moveLeft && !moveRight) {
+        setIsRunning(false);
+      }
+    };
 
-      return () => {
-        window.removeEventListener("keydown", handleKeyDown);
-        window.removeEventListener("keyup", handleKeyUp);
-      };
-    },
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [
-      isRunning,
-      isJumping,
-      isDancing,
-      moveForward,
-      moveBackward,
-      moveLeft,
-      moveRight,
-      isCrouching,
-    ]
-  );
+  }, [
+    isRunning,
+    isJumping,
+    isDancing,
+    moveForward,
+    moveBackward,
+    moveLeft,
+    moveRight,
+    isCrouching,
+  ]);
 
   return (
     <group ref={group} {...props} dispose={null}>
