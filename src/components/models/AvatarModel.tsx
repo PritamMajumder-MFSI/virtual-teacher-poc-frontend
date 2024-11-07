@@ -23,7 +23,16 @@ export const AvatarModel = ({
   const { nodes, materials } = useGLTF(avatarGlb) as unknown as TAvatarModel;
 
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
+  const [moveForward, setMoveForward] = useState(false);
+  const [moveBackward, setMoveBackward] = useState(false);
+  const [moveLeft, setMoveLeft] = useState(false);
+  const [moveRight, setMoveRight] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
+  const [isJumping, setIsJumping] = useState(false);
+  const [isDancing, setIsDancing] = useState(false);
+  const [yVelocity, setYVelocity] = useState(0);
   useEffect(() => {
+    console.log(actions);
     const action = actions?.[animation];
     if (action) {
       action.reset().fadeIn(0.5).play();
@@ -102,10 +111,23 @@ export const AvatarModel = ({
   };
 
   useFrame(() => {
-    if (group.current && moveForward) {
-      group.current.position.z -= 0.05;
-      if (group.current.position.z < -5) {
-        group.current.position.z = 0;
+    if (group.current && !isDancing) {
+      const speed = isRunning ? 0.1 : 0.05;
+
+      if (moveForward) group.current.position.z -= speed;
+      if (moveBackward) group.current.position.z += speed;
+      if (moveLeft) group.current.position.x -= speed;
+      if (moveRight) group.current.position.x += speed;
+
+      if (isJumping) {
+        group.current.position.y += yVelocity;
+        setYVelocity((prev) => prev - 0.01);
+
+        if (group.current.position.y <= 0) {
+          group.current.position.y = 0;
+          setIsJumping(false);
+          setAnimation("idle");
+        }
       }
     }
     changeMouthShape(mouthShape);
@@ -117,30 +139,106 @@ export const AvatarModel = ({
       setIsSpeaking(false);
     }
   }, [mouthShape]);
-  const [moveForward, setMoveForward] = useState(false);
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "w" || event.key === "ArrowUp") {
-        setMoveForward(true);
+      if (event.key === "x") {
+        setIsDancing(true);
+        setAnimation("dance");
+        return;
+      }
+      if (isDancing) return;
+
+      switch (event.key) {
+        case "w":
+        case "ArrowUp":
+          setMoveForward(true);
+          setAnimation(isRunning ? "run" : "walk");
+          break;
+        case "s":
+        case "ArrowDown":
+          setMoveBackward(true);
+          setAnimation(isRunning ? "run_back" : "walk_back");
+          break;
+        case "a":
+        case "ArrowLeft":
+          setMoveLeft(true);
+          setAnimation(isRunning ? "left_strafe" : "left_strafe_walk");
+          break;
+        case "d":
+        case "ArrowRight":
+          setMoveRight(true);
+          setAnimation(isRunning ? "right_strafe" : "right_strafe_walk");
+          break;
+        case "Shift":
+          setIsRunning(true);
+          break;
+        case " ":
+          if (!isJumping) {
+            setIsJumping(true);
+            setYVelocity(0.2);
+            setAnimation("jump");
+          }
+          break;
       }
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
-      if (event.key === "w" || event.key === "ArrowUp") {
-        setMoveForward(false);
+      if (event.key === "x") {
+        setIsDancing(false);
+        setAnimation("idle");
+        return;
+      }
+      if (isDancing) return;
+
+      switch (event.key) {
+        case "w":
+        case "ArrowUp":
+          setMoveForward(false);
+          break;
+        case "s":
+        case "ArrowDown":
+          setMoveBackward(false);
+          break;
+        case "a":
+        case "ArrowLeft":
+          setMoveLeft(false);
+          break;
+        case "d":
+        case "ArrowRight":
+          setMoveRight(false);
+          break;
+        case "Shift":
+          setIsRunning(false);
+          break;
+      }
+
+      if (
+        !moveForward &&
+        !moveBackward &&
+        !moveLeft &&
+        !moveRight &&
+        !isJumping
+      ) {
+        setAnimation("idle");
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
 
-    // Cleanup event listeners
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, []);
-
+  }, [
+    isRunning,
+    isJumping,
+    isDancing,
+    moveForward,
+    moveBackward,
+    moveLeft,
+    moveRight,
+  ]);
   return (
     <group ref={group} {...props} dispose={null}>
       <primitive object={nodes.Hips} />
