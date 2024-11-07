@@ -66,7 +66,7 @@ export const AvatarModel = ({
   });
   const handleMovement = () => {
     if (group.current) {
-      const speed = isRunning ? 0.1 : 0.05;
+      const speed = isRunning ? 0.05 : 0.025;
       let isMoving = false;
 
       if (moveForward) {
@@ -174,6 +174,7 @@ export const AvatarModel = ({
     }
   };
   const handleAnimation = () => {
+    console.log("moveForward", moveForward);
     if (isSpeaking) {
       const actionNames = ["talk_1", "talk_2", "talk_3"];
       if (actionNames.includes(animation)) {
@@ -254,28 +255,25 @@ export const AvatarModel = ({
       }
       if (isDancing) return;
 
-      switch (event.key) {
+      switch (event.key.toLowerCase()) {
         case "w":
-        case "ArrowUp":
+        case "arrowup":
           setMoveForward(true);
           break;
         case "s":
-        case "ArrowDown":
+        case "arrowdown":
           setMoveBackward(true);
           break;
         case "a":
-        case "ArrowLeft":
+        case "arrowleft":
           setMoveLeft(true);
           break;
         case "d":
-        case "ArrowRight":
+        case "arrowright":
           setMoveRight(true);
           break;
-        case "Shift":
-          // Set isRunning only when the Shift key is pressed and movement keys are also pressed
-          if (moveForward || moveBackward || moveLeft || moveRight) {
-            setIsRunning(true);
-          }
+        case "shift":
+          setIsRunning(true);
           break;
         case " ":
           if (!isJumping) {
@@ -283,48 +281,43 @@ export const AvatarModel = ({
             setYVelocity(0.2);
           }
           break;
-        case "Control":
+        case "control":
           setIsCrouching(true);
           break;
       }
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
+      console.log(event);
       if (event.key === "x") {
         setIsDancing(false);
         return;
       }
       if (isDancing) return;
 
-      switch (event.key) {
+      switch (event.key.toLowerCase()) {
         case "w":
-        case "ArrowUp":
+        case "arrowup":
           setMoveForward(false);
           break;
         case "s":
-        case "ArrowDown":
+        case "arrowdown":
           setMoveBackward(false);
           break;
         case "a":
-        case "ArrowLeft":
+        case "arrowleft":
           setMoveLeft(false);
           break;
         case "d":
-        case "ArrowRight":
+        case "arrowright":
           setMoveRight(false);
           break;
-        case "Shift":
-          // Reset isRunning when Shift key is released
+        case "shift":
           setIsRunning(false);
           break;
-        case "Control":
+        case "control":
           setIsCrouching(false);
           break;
-      }
-
-      // If no movement keys are pressed, reset isRunning to false
-      if (!moveForward && !moveBackward && !moveLeft && !moveRight) {
-        setIsRunning(false);
       }
     };
     const canvasContainer = sceneRef.current;
