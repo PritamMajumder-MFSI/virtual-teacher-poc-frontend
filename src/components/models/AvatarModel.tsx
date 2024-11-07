@@ -6,12 +6,18 @@ import { GroupProps, useFrame } from "@react-three/fiber";
 import correspondings from "../../utils/correspondings";
 import * as THREE from "three";
 import { TAvatarModel } from "../../types/gltfTypes";
+// const forwardCameraOffset = new THREE.Vector3(0, 1.5, -2);
+// const backwardCameraOffset = new THREE.Vector3(0, 1.5, 2);
+// const leftCameraOffset = new THREE.Vector3(0, 1.5, -2);
+// const rightCameraOffset = new THREE.Vector3(0, 1.5, -2);
 
 export const AvatarModel = ({
   mouthShape,
+  setOrbitalControlEnabled,
   ...props
 }: {
   mouthShape: string;
+  setOrbitalControlEnabled: React.Dispatch<React.SetStateAction<boolean>>;
 } & GroupProps) => {
   const morphTargetSmoothing = 0.75;
   const group = useRef<Group<THREE.Object3DEventMap>>(null);
@@ -21,6 +27,7 @@ export const AvatarModel = ({
     animations.find((a) => a.name === "idle") ? "idle" : animations[0].name
   );
   const { nodes, materials } = useGLTF(avatarGlb) as unknown as TAvatarModel;
+  const [isCrouching, setIsCrouching] = useState<boolean>(false);
 
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   const [moveForward, setMoveForward] = useState(false);
@@ -31,6 +38,7 @@ export const AvatarModel = ({
   const [isJumping, setIsJumping] = useState(false);
   const [isDancing, setIsDancing] = useState(false);
   const [yVelocity, setYVelocity] = useState(0);
+
   useEffect(() => {
     console.log(actions);
     const action = actions?.[animation];
@@ -49,10 +57,86 @@ export const AvatarModel = ({
     const name = actionNames[randomIndex];
     if (isSpeaking) {
       setAnimation(name);
-    } else {
-      setAnimation("idle");
     }
   }, [isSpeaking]);
+
+  useFrame(({ camera }) => {
+    console.log(isJumping);
+    if (
+      !moveForward &&
+      !moveBackward &&
+      !moveLeft &&
+      !moveRight &&
+      !isJumping &&
+      !isCrouching &&
+      !isSpeaking
+    ) {
+      setAnimation("idle");
+    }
+    handleMovement(camera);
+    changeMouthShape(mouthShape);
+  });
+  const handleMovement = (
+    camera: THREE.Camera & {
+      manual?: boolean;
+    }
+  ) => {
+    if (group.current) {
+      const speed = isRunning ? 0.1 : 0.05;
+      let isMoving = false;
+
+      if (moveForward) {
+        group.current.position.z += speed;
+        isMoving = true;
+      }
+      if (moveBackward) {
+        group.current.position.z -= speed;
+        isMoving = true;
+      }
+      if (moveLeft) {
+        group.current.position.x += speed;
+        isMoving = true;
+      }
+      if (moveRight) {
+        group.current.position.x -= speed;
+        isMoving = true;
+      }
+      if (isJumping) {
+        isMoving = true;
+        group.current.position.y += yVelocity;
+        setYVelocity((prev) => prev - 0.01);
+        if (group.current.position.y <= -1.25) {
+          group.current.position.y = -1.25;
+          adjustCamera(camera);
+          console.log("called");
+          isMoving = false;
+          setIsJumping(false);
+          setYVelocity(0);
+          handleAnimation();
+        }
+      }
+      if (isMoving) adjustCamera(camera);
+    }
+  };
+  const adjustCamera = (
+    camera: THREE.Camera & {
+      manual?: boolean;
+    }
+  ) => {
+    if (!group.current) {
+      return;
+    }
+    const avatarPosition = group.current.position;
+
+    const targetPosition = new THREE.Vector3(
+      avatarPosition.x,
+      avatarPosition.y + 1.5,
+      avatarPosition.z - 2
+    );
+    camera.position.lerp(targetPosition, 0.1);
+
+    setOrbitalControlEnabled(false);
+  };
   const changeMouthShape = (mouthShape: string) => {
     Object.values(correspondings).forEach((value) => {
       if (
@@ -109,29 +193,6 @@ export const AvatarModel = ({
       );
     }
   };
-
-  useFrame(() => {
-    if (group.current && !isDancing) {
-      const speed = isRunning ? 0.1 : 0.05;
-
-      if (moveForward) group.current.position.z -= speed;
-      if (moveBackward) group.current.position.z += speed;
-      if (moveLeft) group.current.position.x -= speed;
-      if (moveRight) group.current.position.x += speed;
-
-      if (isJumping) {
-        group.current.position.y += yVelocity;
-        setYVelocity((prev) => prev - 0.01);
-
-        if (group.current.position.y <= 0) {
-          group.current.position.y = 0;
-          setIsJumping(false);
-          setAnimation("idle");
-        }
-      }
-    }
-    changeMouthShape(mouthShape);
-  });
   useEffect(() => {
     if (mouthShape && mouthShape != "END") {
       setIsSpeaking(true);
@@ -139,106 +200,127 @@ export const AvatarModel = ({
       setIsSpeaking(false);
     }
   }, [mouthShape]);
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "x") {
-        setIsDancing(true);
-        setAnimation("dance");
-        return;
-      }
-      if (isDancing) return;
+  const handleAnimation = () => {
+    if (moveForward) {
+      setAnimation(isRunning ? "run" : "walk");
+    } else if (moveBackward) {
+      setAnimation(isRunning ? "run_back" : "walk_back");
+    } else if (moveLeft) {
+      setAnimation(isRunning ? "left_strafe" : "left_strafe_walk");
+    } else if (moveRight) {
+      setAnimation(isRunning ? "right_strafe" : "right_strafe_walk");
+    } else if (isJumping) {
+      setAnimation("jump");
+    } else if (isCrouching) {
+      setAnimation("crouch");
+    } else if (isDancing) {
+      setAnimation("dance");
+    } else {
+      setAnimation("idle");
+    }
+  };
+  useEffect(
+    () => {
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === "x") {
+          setIsDancing(true);
+          return;
+        }
+        if (isDancing) return;
 
-      switch (event.key) {
-        case "w":
-        case "ArrowUp":
-          setMoveForward(true);
-          setAnimation(isRunning ? "run" : "walk");
-          break;
-        case "s":
-        case "ArrowDown":
-          setMoveBackward(true);
-          setAnimation(isRunning ? "run_back" : "walk_back");
-          break;
-        case "a":
-        case "ArrowLeft":
-          setMoveLeft(true);
-          setAnimation(isRunning ? "left_strafe" : "left_strafe_walk");
-          break;
-        case "d":
-        case "ArrowRight":
-          setMoveRight(true);
-          setAnimation(isRunning ? "right_strafe" : "right_strafe_walk");
-          break;
-        case "Shift":
-          setIsRunning(true);
-          break;
-        case " ":
-          if (!isJumping) {
-            setIsJumping(true);
-            setYVelocity(0.2);
-            setAnimation("jump");
-          }
-          break;
-      }
-    };
+        switch (event.key) {
+          case "w":
+          case "ArrowUp":
+            setMoveForward(true);
+            handleAnimation();
+            break;
+          case "s":
+          case "ArrowDown":
+            setMoveBackward(true);
+            handleAnimation();
+            break;
+          case "a":
+          case "ArrowLeft":
+            setMoveLeft(true);
+            handleAnimation();
+            break;
+          case "d":
+          case "ArrowRight":
+            setMoveRight(true);
+            handleAnimation();
+            break;
+          case "Shift":
+            setIsRunning(true);
+            handleAnimation();
+            break;
+          case " ":
+            if (!isJumping) {
+              setIsJumping(true);
+              setYVelocity(0.2);
+              handleAnimation();
+            }
+            break;
+          case "Control":
+            setIsCrouching(true);
+            handleAnimation();
+            break;
+        }
+      };
 
-    const handleKeyUp = (event: KeyboardEvent) => {
-      if (event.key === "x") {
-        setIsDancing(false);
-        setAnimation("idle");
-        return;
-      }
-      if (isDancing) return;
+      const handleKeyUp = (event: KeyboardEvent) => {
+        if (event.key === "x") {
+          setIsDancing(false);
+          return;
+        }
+        if (isDancing) return;
 
-      switch (event.key) {
-        case "w":
-        case "ArrowUp":
-          setMoveForward(false);
-          break;
-        case "s":
-        case "ArrowDown":
-          setMoveBackward(false);
-          break;
-        case "a":
-        case "ArrowLeft":
-          setMoveLeft(false);
-          break;
-        case "d":
-        case "ArrowRight":
-          setMoveRight(false);
-          break;
-        case "Shift":
-          setIsRunning(false);
-          break;
-      }
+        switch (event.key) {
+          case "w":
+          case "ArrowUp":
+            setMoveForward(false);
+            break;
+          case "s":
+          case "ArrowDown":
+            setMoveBackward(false);
+            break;
+          case "a":
+          case "ArrowLeft":
+            setMoveLeft(false);
+            break;
+          case "d":
+          case "ArrowRight":
+            setMoveRight(false);
+            break;
+          case "Shift":
+            setIsRunning(false);
+            break;
+          case "Control":
+            setIsCrouching(false);
+            break;
+        }
+      };
 
-      if (
-        !moveForward &&
-        !moveBackward &&
-        !moveLeft &&
-        !moveRight &&
-        !isJumping
-      ) {
-        setAnimation("idle");
-      }
-    };
+      window.addEventListener("keydown", handleKeyDown);
+      window.addEventListener("keyup", handleKeyUp);
 
-    window.addEventListener("keydown", handleKeyDown);
-    window.addEventListener("keyup", handleKeyUp);
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown);
+        window.removeEventListener("keyup", handleKeyUp);
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      isRunning,
+      isJumping,
+      isDancing,
+      moveForward,
+      moveBackward,
+      moveLeft,
+      moveRight,
+      isCrouching,
+    ]
+  );
 
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keyup", handleKeyUp);
-    };
-  }, [
-    isRunning,
-    isJumping,
-    isDancing,
-    moveForward,
-    moveBackward,
-    moveLeft,
-    moveRight,
-  ]);
   return (
     <group ref={group} {...props} dispose={null}>
       <primitive object={nodes.Hips} />
