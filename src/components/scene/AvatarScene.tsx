@@ -32,7 +32,7 @@ const AvatarScene = ({ mouthShape }: { mouthShape: string }) => {
         <Suspense fallback={<LoaderScene />}>
           <Sky sunPosition={[1, 0.5, 12]} />
           <AbandonedBrickRoomModel
-            position={[0, -1.25, 0]}
+            position={[0, -1.5, 0]}
             scale={4}
             receiveShadow
           />
