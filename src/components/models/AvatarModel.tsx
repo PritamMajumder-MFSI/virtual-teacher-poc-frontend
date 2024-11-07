@@ -1,10 +1,11 @@
 import { useAnimations, useGLTF } from "@react-three/drei";
 import { avatarAnimationsGlb, avatarGlb } from "../../assets";
-import { Group, MeshStandardMaterial, SkinnedMesh } from "three";
+import { Group } from "three";
 import { useEffect, useRef, useState } from "react";
 import { GroupProps, useFrame } from "@react-three/fiber";
 import correspondings from "../../utils/correspondings";
 import * as THREE from "three";
+import { TAvatarModel } from "../../types/gltfTypes";
 
 export const AvatarModel = ({
   mouthShape,
@@ -13,38 +14,13 @@ export const AvatarModel = ({
   mouthShape: string;
 } & GroupProps) => {
   const morphTargetSmoothing = 0.75;
-  const group = useRef(null);
+  const group = useRef<Group<THREE.Object3DEventMap>>(null);
   const { animations } = useGLTF(avatarAnimationsGlb);
   const { actions } = useAnimations(animations, group);
   const [animation, setAnimation] = useState(
     animations.find((a) => a.name === "idle") ? "idle" : animations[0].name
   );
-  const { nodes, materials } = useGLTF(avatarGlb) as unknown as {
-    nodes: {
-      Hips: Group;
-      EyeLeft: SkinnedMesh;
-      EyeRight: SkinnedMesh;
-      Wolf3D_Head: SkinnedMesh;
-      Wolf3D_Teeth: SkinnedMesh;
-      Wolf3D_Hair: SkinnedMesh;
-      Wolf3D_Glasses: SkinnedMesh;
-      Wolf3D_Body: SkinnedMesh;
-      Wolf3D_Outfit_Bottom: SkinnedMesh;
-      Wolf3D_Outfit_Footwear: SkinnedMesh;
-      Wolf3D_Outfit_Top: SkinnedMesh;
-    };
-    materials: {
-      Wolf3D_Eye: MeshStandardMaterial;
-      Wolf3D_Skin: MeshStandardMaterial;
-      Wolf3D_Teeth: MeshStandardMaterial;
-      Wolf3D_Hair: MeshStandardMaterial;
-      Wolf3D_Glasses: MeshStandardMaterial;
-      Wolf3D_Body: MeshStandardMaterial;
-      Wolf3D_Outfit_Bottom: MeshStandardMaterial;
-      Wolf3D_Outfit_Footwear: MeshStandardMaterial;
-      Wolf3D_Outfit_Top: MeshStandardMaterial;
-    };
-  };
+  const { nodes, materials } = useGLTF(avatarGlb) as unknown as TAvatarModel;
 
   const [isSpeaking, setIsSpeaking] = useState<boolean>(false);
   useEffect(() => {
@@ -126,6 +102,12 @@ export const AvatarModel = ({
   };
 
   useFrame(() => {
+    if (group.current && moveForward) {
+      group.current.position.z -= 0.05;
+      if (group.current.position.z < -5) {
+        group.current.position.z = 0;
+      }
+    }
     changeMouthShape(mouthShape);
   });
   useEffect(() => {
@@ -135,8 +117,32 @@ export const AvatarModel = ({
       setIsSpeaking(false);
     }
   }, [mouthShape]);
+  const [moveForward, setMoveForward] = useState(false);
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "w" || event.key === "ArrowUp") {
+        setMoveForward(true);
+      }
+    };
+
+    const handleKeyUp = (event: KeyboardEvent) => {
+      if (event.key === "w" || event.key === "ArrowUp") {
+        setMoveForward(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    // Cleanup event listeners
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
+
   return (
-    <group ref={group as React.RefObject<Group>} {...props} dispose={null}>
+    <group ref={group} {...props} dispose={null}>
       <primitive object={nodes.Hips} />
       <skinnedMesh
         name="EyeLeft"
