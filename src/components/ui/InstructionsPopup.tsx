@@ -119,7 +119,14 @@ const InstructionsPopup = ({ isOpen, onClose }: InstructionsPopupProps) => {
             <strong>
               <code className="bg-blue-600 text-white p-1 rounded">R</code>
             </strong>{" "}
-            to rotate the character
+            to rotate the character clockwise
+          </li>
+          <li>
+            Press and hold{" "}
+            <strong>
+              <code className="bg-blue-600 text-white p-1 rounded">Q</code>
+            </strong>{" "}
+            to rotate the character anti-clockwise
           </li>
           <li>
             <strong>

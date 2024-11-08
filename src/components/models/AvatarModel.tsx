@@ -35,7 +35,7 @@ export const AvatarModel = ({
     animations.find((a) => a.name === "idle") ? "idle" : animations[0].name
   );
   const [rotateY, setRotateY] = useState(false);
-
+  const [rotateYA, setRotateYA] = useState(false);
   const { nodes, materials } = useGLTF(avatarGlb) as unknown as TAvatarModel;
   const [isCrouching, setIsCrouching] = useState<boolean>(false);
 
@@ -74,6 +74,9 @@ export const AvatarModel = ({
 
       if (rotateY) {
         group.current.rotation.y -= 0.05;
+      }
+      if (rotateYA) {
+        group.current.rotation.y += 0.05;
       }
 
       const forwardDirection = new THREE.Vector3(0, 0, 1);
@@ -339,6 +342,9 @@ export const AvatarModel = ({
         case "r":
           setRotateY(true);
           break;
+        case "q":
+          setRotateYA(true);
+          break;
       }
     };
 
@@ -374,6 +380,9 @@ export const AvatarModel = ({
           break;
         case "r":
           setRotateY(false);
+          break;
+        case "q":
+          setRotateYA(false);
           break;
       }
     };
