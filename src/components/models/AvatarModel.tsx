@@ -97,11 +97,11 @@ export const AvatarModel = ({
         isMoving = true;
       }
       if (moveLeft) {
-        movementVector.add(rightDirection.multiplyScalar(-speed));
+        movementVector.add(rightDirection.multiplyScalar(speed));
         isMoving = true;
       }
       if (moveRight) {
-        movementVector.add(rightDirection.multiplyScalar(speed));
+        movementVector.add(rightDirection.multiplyScalar(-speed));
         isMoving = true;
       }
 
