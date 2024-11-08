@@ -46,17 +46,95 @@ const InstructionsPopup = ({ isOpen, onClose }: InstructionsPopupProps) => {
           Instructions
         </h3>
         <ul className="list-disc ml-5 text-lg text-white space-y-2 animate__animated animate__fadeIn animate__delay-2s">
-          <li>Press and hold W or Up Arrow for moving forward</li>
-          <li>Press and hold S or Down Arrow for moving downwards</li>
-          <li>Press and hold A or Left Arrow for moving leftwards</li>
-          <li>Press and hold D or Right Arrow for moving rightwards</li>
-          <li>Press and hold SHIFT to run during any movement</li>
-          <li>Press Space to jump</li>
-          <li>Press and hold CTRL to crouch</li>
-          <li>Press and hold X to dance</li>
-          <li>Press and hold R to rotate the charecter</li>
-          <li>Left click and drag with mouse to rotate the camera</li>
+          <li>
+            Press and hold{" "}
+            <strong>
+              <code className="bg-blue-600 text-white p-1 rounded">W</code> or{" "}
+              <code className="bg-blue-600 text-white p-1 rounded">
+                Up Arrow
+              </code>
+            </strong>{" "}
+            for moving forward
+          </li>
+          <li>
+            Press and hold{" "}
+            <strong>
+              <code className="bg-blue-600 text-white p-1 rounded">S</code> or{" "}
+              <code className="bg-blue-600 text-white p-1 rounded">
+                Down Arrow
+              </code>
+            </strong>{" "}
+            for moving downwards
+          </li>
+          <li>
+            Press and hold{" "}
+            <strong>
+              <code className="bg-blue-600 text-white p-1 rounded">A</code> or{" "}
+              <code className="bg-blue-600 text-white p-1 rounded">
+                Left Arrow
+              </code>
+            </strong>{" "}
+            for moving leftwards
+          </li>
+          <li>
+            Press and hold{" "}
+            <strong>
+              <code className="bg-blue-600 text-white p-1 rounded">D</code> or{" "}
+              <code className="bg-blue-600 text-white p-1 rounded">
+                Right Arrow
+              </code>
+            </strong>{" "}
+            for moving rightwards
+          </li>
+          <li>
+            Press and hold{" "}
+            <strong>
+              <code className="bg-blue-600 text-white p-1 rounded">SHIFT</code>
+            </strong>{" "}
+            to run during any movement
+          </li>
+          <li>
+            Press{" "}
+            <strong>
+              <code className="bg-blue-600 text-white p-1 rounded">Space</code>
+            </strong>{" "}
+            to jump
+          </li>
+          <li>
+            Press and hold{" "}
+            <strong>
+              <code className="bg-blue-600 text-white p-1 rounded">CTRL</code>
+            </strong>{" "}
+            to crouch
+          </li>
+          <li>
+            Press and hold{" "}
+            <strong>
+              <code className="bg-blue-600 text-white p-1 rounded">X</code>
+            </strong>{" "}
+            to dance
+          </li>
+          <li>
+            Press and hold{" "}
+            <strong>
+              <code className="bg-blue-600 text-white p-1 rounded">R</code>
+            </strong>{" "}
+            to rotate the character
+          </li>
+          <li>
+            <strong>
+              <code className="bg-blue-600 text-white p-1 rounded">
+                Left mouse click
+              </code>
+            </strong>{" "}
+            and drag with mouse to rotate the camera
+          </li>
+          <li>
+            Write something in the bottom text input and press speak to make it
+            lipsync
+          </li>
         </ul>
+
         <div className="mt-4 text-center">
           <button
             className="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-110"
