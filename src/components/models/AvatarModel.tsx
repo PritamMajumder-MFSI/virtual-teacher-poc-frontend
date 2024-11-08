@@ -34,6 +34,8 @@ export const AvatarModel = ({
   const [animation, setAnimation] = useState(
     animations.find((a) => a.name === "idle") ? "idle" : animations[0].name
   );
+  const [rotateY, setRotateY] = useState(false);
+
   const { nodes, materials } = useGLTF(avatarGlb) as unknown as TAvatarModel;
   const [isCrouching, setIsCrouching] = useState<boolean>(false);
 
@@ -70,49 +72,65 @@ export const AvatarModel = ({
       const speed = isRunning ? 0.05 : 0.025;
       let isMoving = false;
 
+      if (rotateY) {
+        group.current.rotation.y -= 0.05;
+      }
+
+      const forwardDirection = new THREE.Vector3(0, 0, 1);
+      const rightDirection = new THREE.Vector3(1, 0, 0);
+
+      forwardDirection.applyQuaternion(group.current.quaternion);
+
+      rightDirection.applyQuaternion(group.current.quaternion);
+
+      forwardDirection.normalize();
+      rightDirection.normalize();
+
+      const movementVector = new THREE.Vector3();
+
       if (moveForward) {
-        group.current.position.z = Math.min(
-          42,
-          group.current.position.z + speed
-        );
+        movementVector.add(forwardDirection.multiplyScalar(speed));
         isMoving = true;
       }
       if (moveBackward) {
-        group.current.position.z = Math.max(
-          -43,
-          group.current.position.z - speed
-        );
+        movementVector.add(forwardDirection.multiplyScalar(-speed));
         isMoving = true;
       }
       if (moveLeft) {
-        group.current.position.x = Math.min(
-          31.5,
-          group.current.position.x + speed
-        );
+        movementVector.add(rightDirection.multiplyScalar(-speed));
         isMoving = true;
       }
       if (moveRight) {
-        group.current.position.x = Math.max(
-          -29.75,
-          group.current.position.x - speed
-        );
+        movementVector.add(rightDirection.multiplyScalar(speed));
         isMoving = true;
       }
+
+      if (isMoving) {
+        const newPosition = group.current.position.clone().add(movementVector);
+
+        group.current.position.set(
+          THREE.MathUtils.clamp(newPosition.x, -29.75, 31.5),
+          group.current.position.y,
+          THREE.MathUtils.clamp(newPosition.z, -43, 42)
+        );
+      }
+
       if (isJumping) {
         isMoving = true;
         group.current.position.y += yVelocity;
         setYVelocity((prev) => prev - 0.01);
         if (group.current.position.y <= -1.25) {
           group.current.position.y = -1.25;
-
           isMoving = false;
           setIsJumping(false);
           setYVelocity(0);
         }
       }
+
       setIsMoving(isMoving);
     }
   };
+
   const adjustCamera = (
     camera: THREE.Camera & {
       manual?: boolean;
@@ -125,7 +143,7 @@ export const AvatarModel = ({
     const targetPosition = new THREE.Vector3(
       avatarPosition.x,
       avatarPosition.y + 1.5,
-      avatarPosition.z - 2
+      avatarPosition.z
     );
     console.log(group.current.position);
     camera.position.lerp(targetPosition, 0.1);
@@ -299,6 +317,9 @@ export const AvatarModel = ({
         case "control":
           setIsCrouching(true);
           break;
+        case "r":
+          setRotateY(true);
+          break;
       }
     };
 
@@ -332,6 +353,9 @@ export const AvatarModel = ({
           break;
         case "control":
           setIsCrouching(false);
+          break;
+        case "r":
+          setRotateY(false);
           break;
       }
     };

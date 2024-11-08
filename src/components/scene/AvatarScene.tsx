@@ -49,6 +49,7 @@ const AvatarScene = ({ mouthShape }: { mouthShape: string }) => {
             setIsJumping={setIsJumping}
             mouthShape={mouthShape}
             roomRef={roomRef}
+            rotation={[0, 5, 0]}
             position={[0, -1.25, 0]}
             scale={1}
             receiveShadow
