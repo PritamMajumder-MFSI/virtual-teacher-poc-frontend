@@ -21,6 +21,7 @@ export const AvatarModel = ({
   orbitControlsRef: React.RefObject<ThreeOrbitControls>;
   isMoving: boolean;
   isJumping: boolean;
+  roomRef: React.RefObject<Group<THREE.Object3DEventMap>>;
   setIsMoving: React.Dispatch<React.SetStateAction<boolean>>;
   sceneRef: React.RefObject<HTMLDivElement>;
 
@@ -70,19 +71,31 @@ export const AvatarModel = ({
       let isMoving = false;
 
       if (moveForward) {
-        group.current.position.z += speed;
+        group.current.position.z = Math.min(
+          42,
+          group.current.position.z + speed
+        );
         isMoving = true;
       }
       if (moveBackward) {
-        group.current.position.z -= speed;
+        group.current.position.z = Math.max(
+          -43,
+          group.current.position.z - speed
+        );
         isMoving = true;
       }
       if (moveLeft) {
-        group.current.position.x += speed;
+        group.current.position.x = Math.min(
+          31.5,
+          group.current.position.x + speed
+        );
         isMoving = true;
       }
       if (moveRight) {
-        group.current.position.x -= speed;
+        group.current.position.x = Math.max(
+          -29.75,
+          group.current.position.x - speed
+        );
         isMoving = true;
       }
       if (isJumping) {
@@ -114,8 +127,10 @@ export const AvatarModel = ({
       avatarPosition.y + 1.5,
       avatarPosition.z - 2
     );
-    orbitControlsRef.current?.target.lerp(targetPosition, 0.1);
+    console.log(group.current.position);
     camera.position.lerp(targetPosition, 0.1);
+    orbitControlsRef.current?.target.lerp(targetPosition, 0.1);
+    orbitControlsRef.current?.update();
   };
   const changeMouthShape = (mouthShape: string) => {
     Object.values(correspondings).forEach((value) => {

@@ -4,12 +4,15 @@ import { Environment, OrbitControls, Sky } from "@react-three/drei";
 import { AbandonedBrickRoomModel, AvatarModel } from "../models";
 import { OrbitControls as ThreeOrbitControls } from "three-stdlib";
 import { LoaderScene } from "./LoaderScene";
+import { Group } from "three/src/Three.js";
 
 const AvatarScene = ({ mouthShape }: { mouthShape: string }) => {
   const [isMoving, setIsMoving] = useState(false);
   const [isJumping, setIsJumping] = useState(false);
   const orbitControlsRef = useRef<ThreeOrbitControls>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
+  const roomRef = useRef<Group>(null);
+
   return (
     <div ref={sceneRef} tabIndex={0}>
       <Canvas
@@ -34,6 +37,7 @@ const AvatarScene = ({ mouthShape }: { mouthShape: string }) => {
           <AbandonedBrickRoomModel
             position={[0, -1.5, 0]}
             scale={4}
+            ref={roomRef}
             receiveShadow
           />
           <AvatarModel
@@ -44,6 +48,7 @@ const AvatarScene = ({ mouthShape }: { mouthShape: string }) => {
             setIsMoving={setIsMoving}
             setIsJumping={setIsJumping}
             mouthShape={mouthShape}
+            roomRef={roomRef}
             position={[0, -1.25, 0]}
             scale={1}
             receiveShadow
