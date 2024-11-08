@@ -49,8 +49,8 @@ export const AvatarModel = ({
   const [yVelocity, setYVelocity] = useState(0);
 
   useEffect(() => {
-    console.log(actions);
     const action = actions?.[animation];
+    console.log(animation, action, actions);
     if (action) {
       action.reset().fadeIn(0.5).play();
 
@@ -145,7 +145,6 @@ export const AvatarModel = ({
       avatarPosition.y + 1.5,
       avatarPosition.z
     );
-    console.log(group.current.position);
     camera.position.lerp(targetPosition, 0.1);
     orbitControlsRef.current?.target.lerp(targetPosition, 0.1);
     orbitControlsRef.current?.update();
@@ -207,7 +206,6 @@ export const AvatarModel = ({
     }
   };
   const handleAnimation = () => {
-    console.log("moveForward", moveForward);
     if (isSpeaking) {
       const actionNames = ["talk_1", "talk_2", "talk_3"];
       if (actionNames.includes(animation)) {
@@ -218,60 +216,81 @@ export const AvatarModel = ({
       if (isSpeaking) {
         setAnimation(name);
       }
+    } else if (isCrouching && moveForward) {
+      if (animation === "crouch_walk") {
+        return;
+      }
+      setAnimation("crouch_walk");
+    } else if (isCrouching && moveBackward) {
+      if (animation === "crouch_walk_back") {
+        return;
+      }
+      setAnimation("crouch_walk_back");
+    } else if (isCrouching && moveLeft) {
+      if (animation === "crouch_walk_right") {
+        return;
+      }
+      setAnimation("crouch_walk_right");
+    } else if (isCrouching && moveRight) {
+      if (animation === "crouch_walk_left") {
+        return;
+      }
+      setAnimation("crouch_walk_left");
     } else if (moveForward) {
       if (
-        (isRunning && animation == "run") ||
-        (!isRunning && animation == "walk")
+        (isRunning && animation === "run") ||
+        (!isRunning && animation === "walk")
       ) {
         return;
       }
       setAnimation(isRunning ? "run" : "walk");
     } else if (moveBackward) {
       if (
-        (isRunning && animation == "run_back") ||
-        (!isRunning && animation == "walk_back")
+        (isRunning && animation === "run_back") ||
+        (!isRunning && animation === "walk_back")
       ) {
         return;
       }
       setAnimation(isRunning ? "run_back" : "walk_back");
     } else if (moveLeft) {
       if (
-        (isRunning && animation == "left_strafe") ||
-        (!isRunning && animation == "left_strafe_walk")
+        (isRunning && animation === "left_strafe") ||
+        (!isRunning && animation === "left_strafe_walk")
       ) {
         return;
       }
       setAnimation(isRunning ? "left_strafe" : "left_strafe_walk");
     } else if (moveRight) {
       if (
-        (isRunning && animation == "right_strafe") ||
-        (!isRunning && animation == "right_strafe_walk")
+        (isRunning && animation === "right_strafe") ||
+        (!isRunning && animation === "right_strafe_walk")
       ) {
         return;
       }
       setAnimation(isRunning ? "right_strafe" : "right_strafe_walk");
     } else if (isJumping) {
-      if (animation == "jump") {
+      if (animation === "jump") {
         return;
       }
       setAnimation("jump");
     } else if (isCrouching) {
-      if (animation == "crouch") {
+      if (animation === "crouch") {
         return;
       }
       setAnimation("crouch");
     } else if (isDancing) {
-      if (animation == "dance") {
+      if (animation === "dance") {
         return;
       }
       setAnimation("dance");
     } else {
-      if (animation == "idle") {
+      if (animation === "idle") {
         return;
       }
       setAnimation("idle");
     }
   };
+
   useEffect(() => {
     if (mouthShape && mouthShape != "END") {
       setIsSpeaking(true);
@@ -314,7 +333,7 @@ export const AvatarModel = ({
             setYVelocity(0.2);
           }
           break;
-        case "control":
+        case "c":
           setIsCrouching(true);
           break;
         case "r":
@@ -324,7 +343,6 @@ export const AvatarModel = ({
     };
 
     const handleKeyUp = (event: KeyboardEvent) => {
-      console.log(event);
       if (event.key === "x") {
         setIsDancing(false);
         return;
@@ -351,7 +369,7 @@ export const AvatarModel = ({
         case "shift":
           setIsRunning(false);
           break;
-        case "control":
+        case "c":
           setIsCrouching(false);
           break;
         case "r":

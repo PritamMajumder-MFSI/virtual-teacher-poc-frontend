@@ -103,3 +103,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Add support for voice input to control the avatar.
 - Implement more gestures and animations for the avatar.
 - Optimize performance for larger avatars or more complex animations.
+
+## 12. SRS and SDD Documents
+
+- **SRS**: Check docs/srs.md
+- **SDD**: Check docs/sdd.md
